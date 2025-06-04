@@ -12,5 +12,5 @@ Safety-Detection-YOLOv8/train/
 Safety-Detection-YOLOv8/valid/
 Safety-Detection-YOLOv8/videos/
 Safety-Detection-YOLOv8/images/ 
-!Safety-Detection-YOLOv8/models/
+Safety-Detection-YOLOv8/models/
 Safety-Detection-YOLOv8/dataset_resized640
