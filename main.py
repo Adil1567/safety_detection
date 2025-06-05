@@ -28,10 +28,15 @@ import base64
 # import torch
 from typing import Optional
 
+from datetime import datetime
+import sqlite3
+
 app = FastAPI()
 
 # Load your model once at startup
-model = YOLO('/Users/adil_zhiyenbayev/adil_code/helmet_detection/Safety-Detection-YOLOv8/models/models--keremberke--yolov8n-hard-hat-detection/snapshots/287bafa2feb311ee45d21f9e9b33315ff6ff955d/best.pt')
+
+model = YOLO('/home/owly/Documents/side-projects/safety_detection/Safety-Detection-YOLOv8/models/ppe.pt')
+#model = YOLO('/Users/adil_zhiyenbayev/adil_code/helmet_detection/Safety-Detection-YOLOv8/models/models--keremberke--yolov8n-hard-hat-detection/snapshots/287bafa2feb311ee45d21f9e9b33315ff6ff955d/best.pt')
 # model = YOLO("/Users/adil_zhiyenbayev/adil_code/hard-hat-detection/yolov8n.pt")
 # model = YOLO("/Users/adil_zhiyenbayev/adil_code/hard-hat-detection/ultralytics/runs/detect/yolov8n_custom_default/weights/best.pt")
 model.overrides['conf'] = 0.25
@@ -49,6 +54,32 @@ model_multiclass.overrides['max_det'] = 1000
 classNames_multiclass = ['Helmet', 'Mask', 'Without_Helmet', 'NO-Mask', 'NO-Safety Vest', 'Person', 'Safety Cone', 'Safety Vest', 'machinery', 'vehicle']
 # classNames = ['Helmet', 'Mask', 'Without_Helmet', 'NO-Mask', 'NO-Safety Vest', 'Person', 'Safety Cone',
 #                   'Safety Vest', 'machinery', 'vehicle']
+
+
+# SAVING INFERENCES TO DB ##################
+
+
+def save_violation(image_path: str, no_helmet: int, no_gloves: int, no_goggles: int):
+    conn = sqlite3.connect("violations.db")
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS violations (
+            timestamp TEXT,
+            image_path TEXT,
+            no_helmet INTEGER,
+            no_gloves INTEGER,
+            no_goggles INTEGER
+        )
+    """)
+    c.execute("INSERT INTO violations VALUES (?, ?, ?, ?, ?)",
+              (datetime.utcnow().isoformat(), image_path, no_helmet, no_mask, no_vest))
+    conn.commit()
+    conn.close()
+
+#########################
+
+
+
 @app.post("/predict/")
 async def predict(file: UploadFile = File(...)):
     # Read image file as bytes
@@ -193,6 +224,17 @@ async def predict_both_multiclass(
 
     output_path = "output_image_multiclass.jpg"
     cv2.imwrite(output_path, img_with_boxes)
+    
+    # working with DB
+    no_helmet = any(d["class"] == "Without_Helmet" for d in detections)
+    no_mask = any(d["class"] == "NO-Mask" for d in detections)
+    no_vest = any(d["class"] == "NO-Safety Vest" for d in detections)
+
+    # Save metadata + image name to DB
+    save_violation(output_path, int(no_helmet), int(no_mask), int(no_vest))
+    
+    ####
+    
     return {
         "detections": detections,
         "image_url": f"/get-image/{output_path}",
@@ -202,3 +244,18 @@ async def predict_both_multiclass(
 @app.get("/get-image/{filename}")
 async def get_image(filename: str):
     return FileResponse(filename, media_type="image/jpeg")
+    
+    
+# part from streamlit work
+
+@app.get("/get-violations/")
+async def get_violations():
+    conn = sqlite3.connect("violations.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM violations ORDER BY timestamp DESC LIMIT 100")
+    rows = c.fetchall()
+    conn.close()
+    # Convert to JSON
+    keys = ["timestamp", "image_path", "no_helmet", "no_mask", "no_vest"]
+    result = [dict(zip(keys, row)) for row in rows]
+    return JSONResponse(content=result)
