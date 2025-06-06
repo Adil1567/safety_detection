@@ -1,5 +1,6 @@
 # Core dependencies
 ultralytics>=8.0.23
+ultralyticsplus==0.1.0
 torch==2.5.1
 torchvision==0.20.1
 torchaudio==2.5.1
