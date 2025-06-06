@@ -258,11 +258,10 @@ async def predict_both_multiclass(
         "cropped_images": cropped_images
     }
 
-@app.get("/get-image/{filename}")
-async def get_image(filename: str):
-    return FileResponse(filename, media_type="image/jpeg")
-    
-    
+@app.get("/get-image/{file_path:path}")
+async def get_image(file_path: str):
+    return FileResponse(file_path, media_type="image/jpeg")
+   
 # part from streamlit work
 
 @app.get("/get-violations/")
