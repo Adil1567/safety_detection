@@ -30,6 +30,7 @@ from typing import Optional
 
 from datetime import datetime
 import sqlite3
+import os
 
 app = FastAPI()
 
@@ -46,7 +47,8 @@ model.overrides['max_det'] = 1000
 classNames = ['Helmet', 'Without_Helmet']
 
 # New multi-class model
-model_multiclass = YOLO('/Users/adil_zhiyenbayev/adil_code/helmet_detection/Safety-Detection-YOLOv8/models/ppe.pt')
+#model_multiclass = YOLO('/Users/adil_zhiyenbayev/adil_code/helmet_detection/Safety-Detection-YOLOv8/models/ppe.pt')
+model_multiclass = YOLO('/home/owly/Documents/side-projects/safety_detection/Safety-Detection-YOLOv8/models/ppe.pt')
 model_multiclass.overrides['conf'] = 0.25
 model_multiclass.overrides['iou'] = 0.45
 model_multiclass.overrides['agnostic_nms'] = False
@@ -59,7 +61,7 @@ classNames_multiclass = ['Helmet', 'Mask', 'Without_Helmet', 'NO-Mask', 'NO-Safe
 # SAVING INFERENCES TO DB ##################
 
 
-def save_violation(image_path: str, no_helmet: int, no_gloves: int, no_goggles: int):
+def save_violation(image_path: str, no_helmet: int, no_mask: int, no_vest: int):
     conn = sqlite3.connect("violations.db")
     c = conn.cursor()
     c.execute("""
@@ -159,8 +161,16 @@ async def predict_both(file: UploadFile = File(...)):
                 cropped_images.append(cropped_filename)
 
     # Save the full image with detections
-    output_path = "output_image.jpg"
-    cv2.imwrite(output_path, img_with_boxes)
+    #output_path = "images/output_image.jpg"
+    
+    os.makedirs("images", exist_ok=True)
+
+    # Generate a unique timestamped filename
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
+    filename = f"{timestamp}.jpg"
+    output_path = f"images/{filename}"
+    
+    #cv2.imwrite(output_path, img_with_boxes)
 
     # Return the detections, full image URL, and cropped image filenames
     return {
@@ -222,7 +232,14 @@ async def predict_both_multiclass(
                     cv2.imwrite(cropped_filename, cropped_img)
                     cropped_images.append(cropped_filename)
 
-    output_path = "output_image_multiclass.jpg"
+    #output_path = "output_image_multiclass.jpg"
+    os.makedirs("images", exist_ok=True)
+
+    # Generate a unique timestamped filename
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
+    filename = f"{timestamp}.jpg"
+    output_path = f"images/{filename}"
+    
     cv2.imwrite(output_path, img_with_boxes)
     
     # working with DB

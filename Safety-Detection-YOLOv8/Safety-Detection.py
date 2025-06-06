@@ -14,15 +14,14 @@ def main():
     parser.add_argument('--folder', type=str, help='Path to a folder containing images')
     args = parser.parse_args()
 
-    # model = YOLO("models/ppe.pt")
-    model = YOLO('keremberke/yolov8n-hard-hat-detection')
+    model = YOLO("models/ppe.pt")
+    # model = YOLO('keremberke/yolov8n-hard-hat-detection')
     model.overrides['conf'] = 0.25
     model.overrides['iou'] = 0.45
     model.overrides['agnostic_nms'] = False
     model.overrides['max_det'] = 1000
-    # classNames = ['Helmet', 'Mask', 'Without_Helmet', 'NO-Mask', 'NO-Safety Vest', 'Person', 'Safety Cone',
-    #               'Safety Vest', 'machinery', 'vehicle']
-    classNames = ['Helmet', 'Without_Helmet']
+    classNames = ['Helmet', 'Mask', 'Without_Helmet', 'NO-Mask', 'NO-Safety Vest', 'Person', 'Safety Cone', 'Safety Vest', 'machinery', 'vehicle']
+    #classNames = ['Helmet', 'Without_Helmet']
 
     myColor = (0, 0, 255)
 
