@@ -28,6 +28,10 @@ import base64
 # import torch
 from typing import Optional
 
+from datetime import datetime
+import sqlite3
+import os
+
 app = FastAPI()
 
 # Load your model once at startup
@@ -49,6 +53,29 @@ model_multiclass.overrides['max_det'] = 1000
 classNames_multiclass = ['Helmet', 'Mask', 'Without_Helmet', 'NO-Mask', 'NO-Safety Vest', 'Person', 'Safety Cone', 'Safety Vest', 'machinery', 'vehicle']
 # classNames = ['Helmet', 'Mask', 'Without_Helmet', 'NO-Mask', 'NO-Safety Vest', 'Person', 'Safety Cone',
 #                   'Safety Vest', 'machinery', 'vehicle']
+
+
+def save_violation(image_path: str, no_helmet: int, no_mask: int, no_vest: int):
+    conn = sqlite3.connect("violations.db")
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS violations (
+            timestamp TEXT,
+            image_path TEXT,
+            no_helmet INTEGER,
+            no_gloves INTEGER,
+            no_goggles INTEGER
+        )
+    """)
+    c.execute("INSERT INTO violations VALUES (?, ?, ?, ?, ?)",
+              (datetime.utcnow().isoformat(), image_path, no_helmet, no_mask, no_vest))
+    conn.commit()
+    conn.close()
+
+
+
+
+
 @app.post("/predict/")
 async def predict(file: UploadFile = File(...)):
     # Read image file as bytes
@@ -128,7 +155,13 @@ async def predict_both(file: UploadFile = File(...)):
                 cropped_images.append(cropped_filename)
 
     # Save the full image with detections
-    output_path = "output_image.jpg"
+    os.makedirs("images", exist_ok=True)
+
+    # Generate a unique timestamped filename
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
+    filename = f"{timestamp}.jpg"
+    output_path = f"images/{filename}"
+    
     cv2.imwrite(output_path, img_with_boxes)
 
     # Return the detections, full image URL, and cropped image filenames
@@ -191,14 +224,41 @@ async def predict_both_multiclass(
                     cv2.imwrite(cropped_filename, cropped_img)
                     cropped_images.append(cropped_filename)
 
-    output_path = "output_image_multiclass.jpg"
+    os.makedirs("images", exist_ok=True)
+
+    # Generate a unique timestamped filename
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
+    filename = f"{timestamp}.jpg"
+    output_path = f"images/{filename}"
+    
     cv2.imwrite(output_path, img_with_boxes)
+    
+    # working with DB
+    no_helmet = any(d["class"] == "Without_Helmet" for d in detections)
+    no_mask = any(d["class"] == "NO-Mask" for d in detections)
+    no_vest = any(d["class"] == "NO-Safety Vest" for d in detections)
+    
+    save_violation(output_path, int(no_helmet), int(no_mask), int(no_vest))
+    
     return {
         "detections": detections,
         "image_url": f"/get-image/{output_path}",
         "cropped_images": cropped_images
     }
 
-@app.get("/get-image/{filename}")
-async def get_image(filename: str):
-    return FileResponse(filename, media_type="image/jpeg")
+@app.get("/get-image/{file_path:path}")
+async def get_image(file_path: str):
+    return FileResponse(file_path, media_type="image/jpeg")
+
+
+@app.get("/get-violations/")
+async def get_violations():
+    conn = sqlite3.connect("violations.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM violations ORDER BY timestamp DESC LIMIT 100")
+    rows = c.fetchall()
+    conn.close()
+    # Convert to JSON
+    keys = ["timestamp", "image_path", "no_helmet", "no_mask", "no_vest"]
+    result = [dict(zip(keys, row)) for row in rows]
+    return JSONResponse(content=result)
