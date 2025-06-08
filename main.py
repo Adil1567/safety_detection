@@ -35,7 +35,7 @@ import os
 app = FastAPI()
 
 # Load your model once at startup
-model = YOLO('/Users/adil_zhiyenbayev/adil_code/helmet_detection/Safety-Detection-YOLOv8/models/models--keremberke--yolov8n-hard-hat-detection/snapshots/287bafa2feb311ee45d21f9e9b33315ff6ff955d/best.pt')
+model = YOLO('./Safety-Detection-YOLOv8/models/best.pt')
 # model = YOLO("/Users/adil_zhiyenbayev/adil_code/hard-hat-detection/yolov8n.pt")
 # model = YOLO("/Users/adil_zhiyenbayev/adil_code/hard-hat-detection/ultralytics/runs/detect/yolov8n_custom_default/weights/best.pt")
 model.overrides['conf'] = 0.25
@@ -45,7 +45,7 @@ model.overrides['max_det'] = 1000
 classNames = ['Helmet', 'Without_Helmet']
 
 # New multi-class model
-model_multiclass = YOLO('/Users/adil_zhiyenbayev/adil_code/helmet_detection/models/best_yolo8m.pt')
+model_multiclass = YOLO('./Safety-Detection-YOLOv8/models/best_yolo8m.pt')
 model_multiclass.overrides['conf'] = 0.25
 model_multiclass.overrides['iou'] = 0.45
 model_multiclass.overrides['agnostic_nms'] = False

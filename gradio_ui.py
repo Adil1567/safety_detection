@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 
 # Define the FastAPI server URL
-FASTAPI_URL = "http://127.0.0.1:8060"
+FASTAPI_URL = "http://127.0.0.1:8000"
 
 MODELS = {
     "2-class": {
@@ -68,9 +68,10 @@ with gr.Blocks() as demo:
             value="2-class",
             label="Select Model"
         )
+        default_classes = MODELS.get("2-class", {}).get("classes", [])
         class_select = gr.CheckboxGroup(
-            choices=MODELS["2-class"]["classes"],
-            value=MODELS["2-class"]["classes"],
+            choices=default_classes,
+            value=default_classes,
             label="Classes to Detect"
         )
     image_input = gr.Image(label="Upload Image", type="filepath")
@@ -79,10 +80,15 @@ with gr.Blocks() as demo:
     gallery = gr.Gallery(label="Cropped Images (Selected Classes)")
 
     def update_classes(selected_model):
-        return gr.CheckboxGroup.update(
+        return gr.CheckboxGroup(
             choices=MODELS[selected_model]["classes"],
             value=MODELS[selected_model]["classes"]
         )
+    #def update_classes(selected_model):
+    #    classes = MODELS.get(selected_model, {}).get("classes", [])
+    #    if not isinstance(classes, list):
+    #        classes = []
+    #    return gr.update(choices=classes, value=classes)
 
     model_choice.change(update_classes, inputs=model_choice, outputs=class_select)
     detect_btn.click(
