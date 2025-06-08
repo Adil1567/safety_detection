@@ -1,23 +1,11 @@
-# Core dependencies
-ultralytics>=8.0.23
-torch>=2.0.0
-torchvision>=0.15.0
-numpy>=1.22.0
-opencv-python>=4.7.0
-Pillow>=9.4.0
-
-# API and UI
-fastapi>=0.95.0
-uvicorn>=0.21.0
-python-multipart>=0.0.6
-gradio>=3.50.0
-
-# Utilities
-requests>=2.28.0
-pandas>=1.5.0
-matplotlib>=3.7.0
-seaborn>=0.12.0
-
-# Optional - for Apple Silicon GPU support
-# torch>=2.0.0+cpu  # for CPU only
-# torch>=2.0.0+mps  # for Mac M1/M2 GPU
+fastapi==0.115.12
+uvicorn==0.34.3
+torch==2.5.0
+ultralytics==8.0.239
+ultralyticsplus==0.1.0
+numpy==1.26.4
+opencv-python==4.8.1.78
+gradio==3.50.2
+requests==2.31.0
+pillow==11.2.1
+python-multipart==0.0.20
