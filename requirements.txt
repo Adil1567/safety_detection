@@ -9,3 +9,7 @@ gradio==3.50.2
 requests==2.31.0
 pillow==11.2.1
 python-multipart==0.0.20
+
+streamlit==1.45.1
+requests==2.31.0
+pandas==2.3.0
