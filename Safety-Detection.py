@@ -14,7 +14,7 @@ def main():
     parser.add_argument('--folder', type=str, help='Path to a folder containing images')
     args = parser.parse_args()
 
-    model = YOLO("models/ppe.pt")
+    model = YOLO("/Users/adil_zhiyenbayev/adil_code/helmet_detection/models/best_yolo8m.pt")
     # model = YOLO('keremberke/yolov8n-hard-hat-detection')
     model.overrides['conf'] = 0.25
     model.overrides['iou'] = 0.45

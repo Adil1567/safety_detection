@@ -41,7 +41,7 @@ model.overrides['max_det'] = 1000
 classNames = ['Helmet', 'Without_Helmet']
 
 # New multi-class model
-model_multiclass = YOLO('/Users/adil_zhiyenbayev/adil_code/helmet_detection/Safety-Detection-YOLOv8/models/best_yolo8m.pt')
+model_multiclass = YOLO('/Users/adil_zhiyenbayev/adil_code/helmet_detection/models/best_yolo8m.pt')
 model_multiclass.overrides['conf'] = 0.25
 model_multiclass.overrides['iou'] = 0.45
 model_multiclass.overrides['agnostic_nms'] = False
