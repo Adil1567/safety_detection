@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 
 # Define the FastAPI server URL
-FASTAPI_URL = "http://127.0.0.1:8060"
+FASTAPI_URL = "http://127.0.0.1:8000"
 
 MODELS = {
     "2-class": {

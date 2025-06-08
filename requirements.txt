@@ -1,18 +1,18 @@
 # Core dependencies
 ultralytics>=8.0.23
-ultralyticsplus==0.1.0
-torch==2.5.1
-torchvision==0.20.1
-torchaudio==2.5.1
+ultralyticsplus>=0.0.24
+torch==2.5.0
+torchvision==0.20.0
+torchaudio==2.5.0
 numpy>=1.22.0
-opencv-python>=4.7.0
-Pillow>=9.4.0
+opencv-python==4.8.1.78
+Pillow>=9.5.0
 
 # API and UI
-fastapi>=0.95.0
-uvicorn>=0.21.0
+fastapi==0.115.12
+uvicorn==0.34.3
 python-multipart>=0.0.6
-gradio>=3.50.0
+gradio==3.50.2
 
 # Utilities
 requests>=2.28.0

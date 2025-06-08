@@ -22,6 +22,7 @@ torch.serialization.add_safe_globals([
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse, FileResponse
 from ultralyticsplus import YOLO
+from ultralytics import YOLO as yolo2
 import numpy as np
 import cv2
 import base64
@@ -36,7 +37,9 @@ app = FastAPI()
 
 # Load your model once at startup
 
-model = YOLO('/home/owly/Documents/side-projects/safety_detection/Safety-Detection-YOLOv8/models/ppe.pt')
+#model = YOLO('/home/owly/Documents/side-projects/safety_detection/Safety-Detection-YOLOv8/models/ppe.pt')
+#model = YOLO('/home/owly/Documents/side-projects/safety_detection/Safety-Detection-YOLOv8/models/best_trained1.pt')
+model = yolo2('/home/owly/Documents/side-projects/safety_detection/Safety-Detection-YOLOv8/models/best.pt')
 #model = YOLO('/Users/adil_zhiyenbayev/adil_code/helmet_detection/Safety-Detection-YOLOv8/models/models--keremberke--yolov8n-hard-hat-detection/snapshots/287bafa2feb311ee45d21f9e9b33315ff6ff955d/best.pt')
 # model = YOLO("/Users/adil_zhiyenbayev/adil_code/hard-hat-detection/yolov8n.pt")
 # model = YOLO("/Users/adil_zhiyenbayev/adil_code/hard-hat-detection/ultralytics/runs/detect/yolov8n_custom_default/weights/best.pt")
@@ -48,12 +51,18 @@ classNames = ['Helmet', 'Without_Helmet']
 
 # New multi-class model
 #model_multiclass = YOLO('/Users/adil_zhiyenbayev/adil_code/helmet_detection/Safety-Detection-YOLOv8/models/ppe.pt')
-model_multiclass = YOLO('/home/owly/Documents/side-projects/safety_detection/Safety-Detection-YOLOv8/models/ppe.pt')
+#model_multiclass = YOLO('/home/owly/Documents/side-projects/safety_detection/Safety-Detection-YOLOv8/models/ppe.pt')
+model_multiclass = YOLO('/home/owly/Documents/side-projects/safety_detection/Safety-Detection-YOLOv8/models/best_yolo8m.pt')
 model_multiclass.overrides['conf'] = 0.25
 model_multiclass.overrides['iou'] = 0.45
 model_multiclass.overrides['agnostic_nms'] = False
 model_multiclass.overrides['max_det'] = 1000
 classNames_multiclass = ['Helmet', 'Mask', 'Without_Helmet', 'NO-Mask', 'NO-Safety Vest', 'Person', 'Safety Cone', 'Safety Vest', 'machinery', 'vehicle']
+
+#classNames_multiclass = ['Hardhat', 'Mask', 'NO-Hardhat', 'NO-Mask',
+#               'NO-Safety Vest', 'Person', 'Safety Cone',
+#               'Safety Vest', 'machinery', 'vehicle']
+
 # classNames = ['Helmet', 'Mask', 'Without_Helmet', 'NO-Mask', 'NO-Safety Vest', 'Person', 'Safety Cone',
 #                   'Safety Vest', 'machinery', 'vehicle']
 
@@ -170,7 +179,7 @@ async def predict_both(file: UploadFile = File(...)):
     filename = f"{timestamp}.jpg"
     output_path = f"images/{filename}"
     
-    #cv2.imwrite(output_path, img_with_boxes)
+    cv2.imwrite(output_path, img_with_boxes)
 
     # Return the detections, full image URL, and cropped image filenames
     return {
